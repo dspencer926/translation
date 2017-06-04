@@ -3,6 +3,7 @@ const path = require('path');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors');
@@ -19,6 +20,7 @@ app.listen(PORT, function() {
 app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use(cors());
 app.use(logger('dev'));
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(methodOverride('_method'));
