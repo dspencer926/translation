@@ -27,13 +27,28 @@ class Translation extends Component {
     this.clear = this.clear.bind(this);
     this.handlePhraseSubmit = this.handlePhraseSubmit.bind(this);
     this.convoToggle = this.convoToggle.bind(this);
+    this.stopRec = this.stopRec.bind(this);
+    this.handleLangFromChange = this.handleLangFromChange.bind(this);
+    this.handleLangToChange = this.handleLangToChange.bind(this);
   }
 
-// componentDidMount() {
-//   this.setState({audioClip: this.props.audioClip});
-//   console.log(this.state.isRecording);
+componentDidMount() {
+  let langFrom = document.querySelector('#langFrom')[0].value;
+  let langTo = document.querySelector('#langTo')[0].value;
+  this.setState({
+    langFrom: langFrom,
+    langTo: langTo,
+  });
+  console.log(langFrom, langTo);
+}
 
-// }
+handleLangFromChange(e) {
+  this.setState({langFrom: e.target.value});
+}
+
+handleLangToChange(e) {
+  this.setState({langTo: e.target.value});
+}
 
 recogRoute() {
   this.setState((prevState) => {return ({isRecording: !prevState.isRecording})}, 
@@ -57,16 +72,18 @@ recognizeAudio() {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({status: 'go'})
+    body: JSON.stringify({
+      status: 'go',
+      langFrom: this.state.langFrom,
+      langTo: this.state.langTo,
+    })
   })
   .then((res) => {
     return res.json()
   })
   .then((json) => {
     console.log(json)
-    let jsonObj = JSON.parse(json);
-    console.log(jsonObj._text);
-    let phrase = jsonObj._text.charAt(0).toUpperCase() + jsonObj._text.slice(1)
+    let phrase = json.data.translation.charAt(0).toUpperCase() + json.data.translation.slice(1)
     console.log(phrase);
     this.setState({
       text: phrase,
@@ -77,13 +94,18 @@ recognizeAudio() {
 
 stopRec() {
   console.log('stop');
+  console.log(this.state.langTo, this.state.langFrom)
   fetch('http://localhost:3001/translation/recognize', {
     credentials: 'same-origin',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({status: 'stop'})
+    body: JSON.stringify({
+      status: 'stop',
+      langFrom: this.state.langFrom,
+      langTo: this.state.langTo,
+    })
   })
 }
 
@@ -207,9 +229,10 @@ translation(e) {
           <div id='input-div'>
             <form id='translation-form' onSubmit={(e) => this.translation(e)}>
               <textarea id='input-box' name='text' rows='3' value={this.state.text} className={this.state.textStyle} onChange={(e) => this.handleInput(e)}/>
+              <div id='sts-box'></div>
                 <div id='to-from-div'>
                   <div id='from-div'>
-                    <select name='langFrom' id='langFrom'> 
+                    <select name='langFrom' id='langFrom' onChange={(e) => {this.handleLangFromChange(e)}}> 
                       <option value='en'>English</option>
                       <option value='es'>Spanish</option>
                       <option value='fr'>French</option>
@@ -227,7 +250,7 @@ translation(e) {
                     <div id='triangle-bottomright'></div>
                   </div>
                   <div id='to-div'>
-                    <select name='langTo' id='langTo'> 
+                    <select name='langTo' id='langTo' onChange={(e) => {this.handleLangToChange(e)}}> 
                       <option value='en'>English</option>
                       <option value='es' selected='selected'>Spanish</option>
                       <option value='fr'>French</option>

@@ -136,7 +136,7 @@ TRANSLATION COMPONENT
 #translation-container {
   display: flex;
   width: 100%;
-  margin: 90px auto;
+  margin: 30px auto;
   flex-direction: column;
 }
 
@@ -146,11 +146,19 @@ TRANSLATION COMPONENT
   width: 100%;
 }
 
-#input-box, #result-box {
+#input-box, #result-box, #sts-box {
   width: 85%;
-  font-size: 1.75em;
+  font-size: 1.25em;
   padding: 20px;
   box-sizing: border-box;
+}
+
+#sts-box {
+  height: 125px;
+  background-color: #FF5E5B;
+  border-top: 1px solid black;
+  margin: auto;
+  font-size: 1.5em;
 }
 
 .text-animate {

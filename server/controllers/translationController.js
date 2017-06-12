@@ -5,9 +5,115 @@ const translationController = {};
 const rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com/package/node-record-lpcm16#options 
   // var request = require('request')
 const projectId = 'translation-app-168502';
+const translateClient = Translate({
+    projectId: projectId
+  });
 
 translationController.recognize = (req, res) => {
+
+  // _______________________WIT CODE RECOG W/ AUTO STS TRANSLATION __________________________________________________
+
+  var rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com/package/node-record-lpcm16#options 
+  var request = require('request')
+  var text = '';
+  let langFrom = req.body.langFrom;
+  let langTo = req.body.langTo
+  var options = {
+    from: langFrom,
+    to: langTo,
+  };
   
+  var witToken = process.env.WIT_TOKEN;
+
+  exports.parseResult = (err, resp, body) => {
+    let jsonObj = JSON.parse(body)
+    text = jsonObj._text;
+    console.log('original recog', text)
+    startTranslation(text, options);
+  }
+  
+ if (req.body.status === 'go') {
+  rec.start().pipe(request.post({
+    'url'     : `https://api.wit.ai/speech?client=chromium&lang=es&output=json`,   //add multi-language input functionality
+    'headers' : {
+      'Accept'        : 'application/vnd.wit.20160202+json',
+      'Authorization' : 'Bearer ' + witToken,
+      'Content-Type'  : 'audio/wav'
+    }
+  }, exports.parseResult))
+ }
+ 
+ if (req.body.status === 'stop') {
+  rec.stop()
+ }
+
+  function startTranslation(text, options) {
+  console.log('options', options)
+    translateClient.translate(text, options)
+      .then((results) => {
+        const translation = results[0];
+        console.log('translation 1', translation);
+        text = translation;
+        options = {
+          from: options.to,
+          to: options.from,
+        };
+        translateClient.translate(text, options)
+        .then((results) => {
+          const STStranslation = results[0];
+          console.log('translation 2', STStranslation);
+          res.json({message: 'worked', data: {translation: STStranslation, source: options.from, target: options.to}})
+      })
+      .catch((err) => {
+        console.error('ERROR:', err);
+      });
+    });
+  }
+
+
+
+
+
+
+
+
+}
+
+
+//___________________________________________________________________________________________________________________
+
+// _______________________WIT CODE JUST RECOG; NO AUTO STS TRANSLATION _____________________________________
+
+//   var rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com/package/node-record-lpcm16#options 
+//   var request = require('request')
+  
+//   var witToken = process.env.WIT_TOKEN;
+
+//   exports.parseResult = (err, resp, body) => {
+//     res.json(body);
+//   }
+  
+//  if (req.body.status === 'go') {
+//   rec.start().pipe(request.post({
+//     'url'     : `https://api.wit.ai/speech?client=chromium&lang=es&output=json`,   //add multi-language input functionality
+//     'headers' : {
+//       'Accept'        : 'application/vnd.wit.20160202+json',
+//       'Authorization' : 'Bearer ' + witToken,
+//       'Content-Type'  : 'audio/wav'
+//     }
+//   }, exports.parseResult))
+//  }
+ 
+//  if (req.body.status === 'stop') {
+//   rec.stop()
+//  }
+
+// }
+
+//__________________________________________________________________________
+
+
+
 //__________________NUANCE CODE_____________________________________________
 
   // let appId = 'NMDPTRIAL_dspencer926_gmail_com20170528030155';
@@ -46,35 +152,6 @@ translationController.recognize = (req, res) => {
 // }
 //_____________________________________________________________________
 
-// _______________________WIT CODE_____________________________________
-
-  var rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com/package/node-record-lpcm16#options 
-  var request = require('request')
-  
-  var witToken = process.env.WIT_TOKEN;
-
-  exports.parseResult = (err, resp, body) => {
-    res.json(body);
-  }
-  
- if (req.body.status === 'go') {
-  rec.start().pipe(request.post({
-    'url'     : `https://api.wit.ai/speech?client=chromium&lang=es&output=json`,   //add multi-language input functionality
-    'headers' : {
-      'Accept'        : 'application/vnd.wit.20160202+json',
-      'Authorization' : 'Bearer ' + witToken,
-      'Content-Type'  : 'audio/wav'
-    }
-  }, exports.parseResult))
- }
- 
- if (req.body.status === 'stop') {
-  rec.stop()
- }
-
-}
-
-//___________________________________________________________________
 
 //_______________________DON'T REMEMBER WHAT THIS IS_________________
 
@@ -154,27 +231,36 @@ translationController.recognize = (req, res) => {
 //     })
 // }
 
-//_____________________________________________________________
+//___________________________________________________________________________________________________________
 
 
+//______________GOOGLE TRANSLATE_____________________________________________________________________________
 
 translationController.translate = (req, res) => {
-  const translateClient = Translate({
-    projectId: projectId
-  });
-  const text = req.body.text;
-  const options = {
+  var text = req.body.text;
+  var options = {
     from: req.body.langFrom,
     to: req.body.langTo,
   };
   translateClient.translate(text, options)
     .then((results) => {
       const translation = results[0];
-      res.json({message: 'worked', data: {translation: translation, source: options.from, target: options.to}})
+      console.log(translation);
+      text = translation;
+      options = {
+        from: options.to,
+        to: options.from,
+      };
+      translateClient.translate(text, options)
+      .then((results) => {
+        const translation = results[0];
+        console.log(translation);
+        res.json({message: 'worked', data: {translation: translation, source: options.from, target: options.to}})
     })
     .catch((err) => {
       console.error('ERROR:', err);
     });
+});
 }
 
 

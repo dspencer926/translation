@@ -30,15 +30,6 @@ class App extends Component {
     this.setState({audioClip: clip});
   }
 
-  // componentDidMount() {
-  //   fetch('http://localhost:3001/api/phrases') 
-  //   .then((response) => {
-  //     return response.json()
-  //   })
-  //   .then ((responseJson) => {
-  //     console.log(responseJson)
-  //   });
-  // }
 
   render() {
     return (
