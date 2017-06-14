@@ -4,7 +4,7 @@ navigator.getUserMedia = navigator.getUserMedia ||
                          navigator.webkitGetUserMedia ||
                          navigator.mozGetUserMedia;
 
-class Nav extends Component {
+class Recorder extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -117,4 +117,4 @@ class Nav extends Component {
   }
 }
 
-export default Nav;
+export default Recorder;

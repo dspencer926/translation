@@ -146,6 +146,24 @@ TRANSLATION COMPONENT
   width: 100%;
 }
 
+.on-top {  /* for translation choice box*/
+  position: fixed;
+  border-radius: 15px;
+  margin: 25%;
+  background-color: gray;
+  z-index: 2;
+}
+
+.on-top ul {
+  list-style: none;
+  padding: 20px;
+}
+
+.on-top ul li {
+  border: 1px solid black;
+  margin-bottom: 5px;
+}
+
 #input-box, #result-box, #sts-box {
   width: 85%;
   font-size: 1.25em;

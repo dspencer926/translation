@@ -6,30 +6,31 @@ class Translation extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: '',
-      langFrom: '',
-      langTo: '',
-      result: '',
-      speakLang: '',
-      audioClip: null,
-      isRecording: false,
-      recClass: 'off',
-      convoMode: false,
-      convoStyle: {backgroundColor: '#FFFFEA', color: 'black'},
-      textStyle: null,
-      resultStyle: null,
+      langFrom: '',                                                 //  source language code (from drop-down)
+      langTo: '',                                                   //  target language code (from drop-down)
+      speakLang: '',                                                //  language-code for TTS to speak
+      audioClip: null,                                              //  TTS audio clip 
+      text: '',                                                     //  input text to be translated
+      stsTranslation: '',                                           //  STS translation
+      result: '',                                                   //  translated text
+      isRecording: false,                                           //  true/false is recording voice
+      recClass: 'off',                                              //  class for record button animation
+      convoMode: false,                                             //  conversation mode on/off
+      convoStyle: {backgroundColor: '#FFFFEA', color: 'black'},     //  conversation mode button style
+      textStyle: null,                                              //  for animation of text
+      resultStyle: null,                                            //  ''
     }
-    this.handleInput = this.handleInput.bind(this);
-    this.speak = this.speak.bind(this);
-    this.translation = this.translation.bind(this);
-    this.recognizeAudio = this.recognizeAudio.bind(this);
-    this.recogRoute = this.recogRoute.bind(this);
-    this.clear = this.clear.bind(this);
-    this.handlePhraseSubmit = this.handlePhraseSubmit.bind(this);
-    this.convoToggle = this.convoToggle.bind(this);
-    this.stopRec = this.stopRec.bind(this);
     this.handleLangFromChange = this.handleLangFromChange.bind(this);
+    this.handlePhraseSubmit = this.handlePhraseSubmit.bind(this);
     this.handleLangToChange = this.handleLangToChange.bind(this);
+    this.recognizeAudio = this.recognizeAudio.bind(this);
+    this.handleInput = this.handleInput.bind(this);
+    this.translation = this.translation.bind(this);
+    this.convoToggle = this.convoToggle.bind(this);
+    this.recogRoute = this.recogRoute.bind(this);
+    this.stopRec = this.stopRec.bind(this);
+    this.clear = this.clear.bind(this);
+    this.speak = this.speak.bind(this);
   }
 
 componentDidMount() {
@@ -42,14 +43,33 @@ componentDidMount() {
   console.log(langFrom, langTo);
 }
 
-handleLangFromChange(e) {
+componentDidUpdate() {
+  console.log('updating');
+  console.log(this.state);
+
+}
+
+//sets state with input text
+handleInput(e) {
+  this.setState({text: e.target.value});
+}
+
+//sets state with translation result text
+handleResult(e) {
+  this.setState({result: e.target.value});
+}
+
+// state change for source language change
+handleLangFromChange(e) {      
   this.setState({langFrom: e.target.value});
 }
 
+// state change for target language change
 handleLangToChange(e) {
   this.setState({langTo: e.target.value});
 }
 
+// decides what to do when record button is clicked
 recogRoute() {
   this.setState((prevState) => {return ({isRecording: !prevState.isRecording})}, 
     () => {
@@ -64,6 +84,7 @@ recogRoute() {
   });
 }
 
+// sends recorded audio to backend for recognition [then creates choice div if necessary] <-- make its own function?
 recognizeAudio() {
   this.setState({textStyle: null});
   fetch('http://localhost:3001/translation/recognize', {
@@ -82,16 +103,68 @@ recognizeAudio() {
     return res.json()
   })
   .then((json) => {
-    console.log(json)
-    let phrase = json.data.translation.charAt(0).toUpperCase() + json.data.translation.slice(1)
-    console.log(phrase);
-    this.setState({
-      text: phrase,
-      textStyle: 'text-animate',
-    })
+    console.log(json);
+    let resultArr = json.split('\n');
+    console.log(resultArr);
+    if (resultArr.length > 1) {this.choiceDiv(resultArr)}
   })
 }
+  
+choiceDiv(arr) {
+  arr.pop();
+  console.log(arr);
+  let translationBox = document.querySelector('#input-div');
+  let choiceBox = document.createElement('div');
+  let choiceList = document.createElement('ul');
+  let choices = arr.forEach((val) => {
+    let newChoice = document.createElement('li');
+    let newButton = document.createElement('button')
+    newButton.addEventListener('click', 
+      (e) => {
+        this.setState({
+          text: e.target.innerHTML,
+          textStyle: 'text-animate',
+        }, 
+        () => {
+          choiceBox.remove()
+          this.translation();
+        })
+      })
+    newButton.innerHTML = val;
+    newChoice.appendChild(newButton);
+    choiceList.appendChild(newChoice);
+  })
+  choiceBox.appendChild(choiceList);
+  choiceBox.classList.add('on-top');
+  translationBox.appendChild(choiceBox);
+}
 
+//________ANIMATION FOR TEXT APPEARANCE_____________________________________________________________________
+    // let phrase = json.data.translation.charAt(0).toUpperCase() + json.data.translation.slice(1)
+    // console.log(phrase);
+//___________________________________________________________________________________________________________
+
+
+
+// trying to do the Nuance TTS fetch
+//________________________________________________________________________________________________________________
+  // fetch('http://localhost:3001/translation/speak', {
+  //   credentials: 'same-origin',
+  //   method: 'GET'})
+  //   .then((response) => {
+  //     return response;
+  //   })
+  //   .then((blob) => {
+  //     let ctx = new AudioContext;
+  //     let body = blob.body;
+  //     let reader = body.getReader();
+  //     reader.read().then((result) => {
+  //     console.log(result);
+  //     }) 
+//____________________________________________________________________________________________________________________
+
+
+//stops recording when recording button is clicked
 stopRec() {
   console.log('stop');
   console.log(this.state.langTo, this.state.langFrom)
@@ -104,14 +177,13 @@ stopRec() {
     body: JSON.stringify({
       status: 'stop',
       langFrom: this.state.langFrom,
-      langTo: this.state.langTo,
     })
   })
 }
 
+// sends input text to backend to be translated and sets state with translated resul [then sends info to TTS] <-- own func?
 translation(e) {
   this.setState({resultStyle: null});
-  e.preventDefault();
   fetch('http://localhost:3001/translation/translate', {
     credentials: 'same-origin',
     method: 'POST',
@@ -120,8 +192,8 @@ translation(e) {
     },
     body: JSON.stringify({
       text: this.state.text,
-      langFrom: e.target.langFrom.value,
-      langTo: e.target.langTo.value,
+      langFrom: this.state.langFrom,
+      langTo: this.state.langTo,
     })
   })
   .then((res) => {
@@ -130,9 +202,13 @@ translation(e) {
   .then((json) => {
     console.log(json);
     this.setState({
+      stsTranslation: json.data.stsTranslation,
       result: json.data.translation,
       resultStyle: 'text-animate',
     });
+
+// should probably put the following in the speak function
+
     let speakLang;
     switch (json.data.target) {
       case 'es': 
@@ -170,23 +246,18 @@ translation(e) {
         break;
       this.setState({speakLang: speakLang})
     }
-    this.speak(json.data.translation, speakLang);
+    // this.speak(json.data.translation, speakLang);
   })
 }
 
-  handleInput(e) {
-    this.setState({text: e.target.value});
-  }
 
-  handleResult(e) {
-    this.setState({result: e.target.value});
-  }
-
+//runs TTS module
   speak(result, lang) {
     console.log(`in speech ${result, lang}`)
     responsiveVoice.speak(result, lang);
   }
 
+//submits info to save phrase [delete?]
   handlePhraseSubmit() {
     let lang = document.querySelector('#langFrom')[0].value;
     fetch('http://localhost:3001/api/phrases', {
@@ -206,6 +277,7 @@ translation(e) {
     })
 }
 
+// toggles conversation mode on/off
   convoToggle() {
     this.setState({convoMode: !this.state.convoMode},
     () => {
@@ -215,6 +287,7 @@ translation(e) {
     });
   }
 
+//clears both input/result divs
   clear() {
     this.setState({
       text: '',
@@ -229,10 +302,35 @@ translation(e) {
           <div id='input-div'>
             <form id='translation-form' onSubmit={(e) => this.translation(e)}>
               <textarea id='input-box' name='text' rows='3' value={this.state.text} className={this.state.textStyle} onChange={(e) => this.handleInput(e)}/>
-              <div id='sts-box'></div>
+              <div id='sts-box'>
+                <textarea value={this.state.stsTranslation}/>
+              </div>
                 <div id='to-from-div'>
                   <div id='from-div'>
-                    <select name='langFrom' id='langFrom' onChange={(e) => {this.handleLangFromChange(e)}}> 
+                    <select name='langFrom' defaultValue='eng-USA' id='langFrom' onChange={(e) => {this.handleLangFromChange(e)}}> 
+                      <option value='eng-USA'>English</option>
+                      <option value='spa-XLA'>Spanish</option>
+                      <option value='fra-FRA'>French</option>
+                      <option value='por-BRA'>Portuguese</option>
+                      <option value='ita-ITA'>Italian</option>
+                      <option value='rus-RUS'>Russian</option>
+                      <option value='ara-XWW'>Arabic</option>
+                      <option value='cmn-CHN'>Chinese</option>
+                      <option value='jpn-JPN'>Japanese</option>
+                      <option value='deu-DEU'>German</option>
+                      <option value='heb-ISR'>Hebrew</option>
+                      <option value='fin-FIN'>Finnish</option>
+                      <option value='hin-IND'>Hindi</option>
+                      <option value='kor-KOR'>Korean</option>
+                      <option value='tur-TUR'>Turkish</option>
+                    </select>
+                  </div>
+                  <div id='triangle-div'>
+                    <div id='triangle-topleft'></div>
+                    <div id='triangle-bottomright'></div>
+                  </div>
+                  <div id='to-div'>
+                    <select name='langTo' id='langTo' defaultValue='es' onChange={(e) => {this.handleLangToChange(e)}}> 
                       <option value='en'>English</option>
                       <option value='es'>Spanish</option>
                       <option value='fr'>French</option>
@@ -243,24 +341,11 @@ translation(e) {
                       <option value='zh-CN'>Chinese</option>
                       <option value='ja'>Japanese</option>
                       <option value='de'>German</option>
-                    </select>
-                  </div>
-                  <div id='triangle-div'>
-                    <div id='triangle-topleft'></div>
-                    <div id='triangle-bottomright'></div>
-                  </div>
-                  <div id='to-div'>
-                    <select name='langTo' id='langTo' onChange={(e) => {this.handleLangToChange(e)}}> 
-                      <option value='en'>English</option>
-                      <option value='es' selected='selected'>Spanish</option>
-                      <option value='fr'>French</option>
-                      <option value='pt'>Portuguese</option>
-                      <option value='it'>Italian</option>
-                      <option value='ru'>Russian</option>
-                      <option value='ar'>Arabic</option>
-                      <option value='zh-CN'>Chinese</option>
-                      <option value='ja'>Japanese</option>
-                      <option value='de'>German</option>
+                      <option value='iw'>Hebrew</option>
+                      <option value='fi'>Finnish</option>
+                      <option value='hi'>Hindi</option>
+                      <option value='ko'>Korean</option>
+                      <option value='tr'>Turkish</option>
                     </select>
                   </div>
                   </div>

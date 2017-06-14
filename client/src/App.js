@@ -35,10 +35,12 @@ class App extends Component {
     return (
       <Router>
       <div className="App">
-          <Route exact path='/' component={Translation} />
+          <Translation recordState={this.recordState} />
           <Route path='/login' component={Login} />
           <Route path='/register' component={Signup} />
-          {/*<Recorder recordState={this.recordState}/>
+          {/*
+          <Route exact path='/' component={Translation} />
+          <Recorder audioClip={this.state.audioClip}/>
           <Nav />
           <main> 
           </main>
