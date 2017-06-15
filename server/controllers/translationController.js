@@ -25,7 +25,7 @@ translationController.recognize = (req, res) => {
 
 
   exports.parseResult = (err, resp, body) => {
-    res.json(body);
+    res.json(body);  // figure out status/error
   }
   
  if (req.body.status === 'go') {
@@ -217,9 +217,6 @@ translationController.translate = (req, res) => {
       break;
     case 'hin-IND': 
       langFrom = 'hi';
-      break;
-    case 'it': 
-      langFrom = 'Italian Female';
       break;
     case 'ara-XWW': 
       langFrom = 'ar';
