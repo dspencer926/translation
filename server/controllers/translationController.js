@@ -29,7 +29,9 @@ translationController.recognize = (req, res) => {
   }
   
  if (req.body.status === 'go') {
-  rec.start().pipe(request.post({
+  rec.start({
+    sampleRate: 16000,
+  }).pipe(request.post({
     'url'     : `https://dictation.nuancemobility.net/NMDPAsrCmdServlet/dictation?appId=${appId}&appKey=${appKey}`,   //add multi-language input functionality
     'headers' : {
       'Transfer-Encoding': 'chunked',

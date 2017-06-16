@@ -173,7 +173,7 @@ TRANSLATION COMPONENT
 
 #sts-box {
   height: 125px;
-  background-color: #FF5E5B;
+  background-color: #FFED66;
   border-top: 1px solid black;
   margin: auto;
   font-size: 1.5em;
@@ -198,10 +198,11 @@ textarea {
 
 #input-box {
   width: 85%;
+  height: 300px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
-  background-color: #FF5E5B;
-  border: 1px solid #FF5E5B;
+  background-color: #FFED66;
+  border: 1px solid #FFED66;
 }
 
 
@@ -276,7 +277,7 @@ select {
   position: absolute;
   bottom: 90%;
   left: 5%;
-  background-color: #FF5E5B;
+  background-color: #FFED66;
   padding: 5px;
   z-index: 2;
 } 
@@ -290,7 +291,7 @@ select {
     top: 15%;
     padding-left: 20px;
     border-radius: 0;
-    background-color: #FF5E5B;
+    background-color: #FFED66;
     border: none;
     outline: none;
 }
@@ -307,7 +308,7 @@ select {
 	width: 0;
 	height: 0;
   top: 15%;
-	border-top: 40px solid #FF5E5B;
+	border-top: 40px solid #FFED66;
 	border-right: 40px solid transparent;
 }
 
@@ -372,13 +373,13 @@ select {
 }
 
 #save-btn {
-  background-color: #FFED66;
+  background-color: #00CECB;
   /*color: #FFFFEA;*/
   border-radius: 15px;
 }
 
 #clear-btn {
-  background-color: #FFED66;
+  background-color: #00CECB;
   /*color: #FFFFEA;*/
   border-radius: 15px;
   

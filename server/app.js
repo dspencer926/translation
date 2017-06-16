@@ -9,7 +9,7 @@ const passport = require('passport');
 const cors = require('cors');
 const app = express();
 var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+var io = require('socket.io').listen(server);
 
 require('dotenv').config()
 
@@ -19,7 +19,7 @@ server.listen(PORT, function() {
   console.log(`listening on port ${PORT}`);
 });
 
-socket = io.listen(server);
+// socket = io.listen(server);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use(cors());
@@ -45,7 +45,8 @@ app.get('/', function(req, res) {
 });
 
 let socketIds = [];
-socket.on('connection', (socket) => {
+
+io.sockets.on('connection', (socket) => {
   socketIds.push(socket.id);
   console.log(socketIds)
   console.log('connected');
