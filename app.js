@@ -17,7 +17,7 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + 'client/build/index.html');
 });
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, function() {
   console.log(`listening on port ${PORT}`);
 });
