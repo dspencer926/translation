@@ -14,7 +14,7 @@ var io = require('socket.io').listen(server);
 require('dotenv').config()
 
 app.get('/', function(req, res) {
-  res.sendFile(__dirname + 'client/build/index.html');
+  res.sendFile(__dirname + '/client/build/index.html');
 });
 
 const PORT = process.env.PORT || 3001;
@@ -24,7 +24,7 @@ server.listen(PORT, function() {
 
 // socket = io.listen(server);
 
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, '/client/build')));
 app.use(cors());
 app.use(logger('dev'));
 app.use(cookieParser());
