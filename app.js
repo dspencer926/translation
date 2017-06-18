@@ -12,7 +12,6 @@ var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
 require('dotenv').config()
-// app.use(express.static(path.join(__dirname, '/client/build')));
 
 
 const PORT = process.env.PORT || 3000;
@@ -22,6 +21,7 @@ server.listen(PORT, function() {
 
 // socket = io.listen(server);
 
+app.use(express.static(path.join(__dirname, '/client/build')));
 app.use(cors());
 app.use(logger('dev'));
 app.use(cookieParser());
@@ -40,9 +40,6 @@ app.use(passport.session());
 
 
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/client/build/index.html');
-});
 
 let socketIds = [];
 
@@ -83,6 +80,9 @@ app.use('/testing', (req, res) => {
     res.send({user: req.user, auth: true});
 });
 
+app.get('/*', function(req, res) {
+  res.sendFile(__dirname + '/client/build/index.html');
+});
 
 /* handling 404 */
 app.get('*', function(req, res) {
