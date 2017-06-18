@@ -40,6 +40,9 @@ app.use(passport.session());
 
 
 
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/client/build/index.html');
+});
 
 let socketIds = [];
 
@@ -80,9 +83,6 @@ app.use('/testing', (req, res) => {
     res.send({user: req.user, auth: true});
 });
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/client/build/index.html');
-});
 
 /* handling 404 */
 app.get('*', function(req, res) {
