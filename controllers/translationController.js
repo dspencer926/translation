@@ -25,7 +25,7 @@ translationController.recognize = (req, res) => {
 
 
   exports.parseResult = (err, resp, body) => {
-    res.json(body);  // figure out status/error
+    return res.json(body);  // figure out status/error
   }
   
  if (req.body.status === 'go') {
@@ -304,6 +304,8 @@ translationController.translate = (req, res) => {
 
 
 //_________________________________________________________________________________________________________________
+
+
 
 
 module.exports = translationController;
