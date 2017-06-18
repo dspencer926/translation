@@ -1,7 +1,7 @@
 {
-  "name": "speakeasy",
+  "name": "speakeasyv2",
   "version": "1.0.0",
-  "description": "backend for translation app",
+  "description": "speakeasy v2 backend",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -20,27 +20,17 @@
   },
   "homepage": "https://github.com/dspencer926/translation",
   "dependencies": {
-    "@google-cloud/speech": "^0.9.2",
     "@google-cloud/translate": "^0.8.2",
-    "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.2",
-    "child_process": "^1.0.2",
-    "cookie-parser": "^1.4.3",
-    "cookie-session": "^2.0.0-beta.2",
     "cors": "^2.8.3",
     "dotenv": "^4.0.0",
     "express": "^4.15.3",
-    "express-session": "^1.15.3",
     "fs": "0.0.1-security",
     "isomorphic-fetch": "^2.2.1",
-    "method-override": "^2.3.9",
     "morgan": "^1.8.1",
     "node-record-lpcm16": "^0.3.0",
     "nodemon": "^1.11.0",
-    "passport": "^0.3.2",
-    "passport-local": "^1.0.0",
     "path": "^0.12.7",
-    "pg-promise": "^5.7.1",
     "request": "^2.81.0",
     "socket.io": "^2.0.3"
   }

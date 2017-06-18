@@ -1,2 +1,0 @@
-# speakeasy
-Speakeasy app
