@@ -80,7 +80,7 @@ app.use('/translation', translationRoute);
 //     res.send({user: req.user, auth: true});
 // });
 
-app.get('/*', function(req, res) {
+app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/build/index.html');
 });
 
