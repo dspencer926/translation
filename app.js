@@ -28,13 +28,13 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(methodOverride('_method'));
-app.use(session({
-  secret: process.env.SECRET_KEY,
-  resave: false,
-  saveUninitialized: true,
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(session({
+//   secret: process.env.SECRET_KEY,
+//   resave: false,
+//   saveUninitialized: true,
+// }));
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 
 
@@ -69,16 +69,16 @@ socket.on('disconnect', (socket) => {
 const translationRoute = require('./routes/translationRoute');
 app.use('/translation', translationRoute);
 
-const authRoutes = require('./routes/authRoutes');
-app.use('/auth', authRoutes);
+// const authRoutes = require('./routes/authRoutes');
+// app.use('/auth', authRoutes);
 
-const userRoutes = require('./routes/userRoutes');
-app.use('/users', userRoutes)
+// const userRoutes = require('./routes/userRoutes');
+// app.use('/users', userRoutes)
 
-app.use('/testing', (req, res) => {
-    console.log('successssss', req.user);
-    res.send({user: req.user, auth: true});
-});
+// app.use('/testing', (req, res) => {
+//     console.log('successssss', req.user);
+//     res.send({user: req.user, auth: true});
+// });
 
 app.get('/*', function(req, res) {
   res.sendFile(__dirname + '/client/build/index.html');

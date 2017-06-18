@@ -17,7 +17,7 @@ translationController.recognize = (req, res) => {
 
 //__________________NUANCE CODE_____________________________________________________________________________________
 
-
+  console.log('************************************in recognize******************************************************')
   const rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com/package/node-record-lpcm16#options 
   const request = require('request')
   let langFrom = req.body.langFrom;
