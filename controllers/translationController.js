@@ -1,6 +1,5 @@
 const Translate = require('@google-cloud/translate');
 const Speech = require('@google-cloud/speech');
-require('isomorphic-fetch');
 
 const translationController = {};
 
@@ -20,7 +19,7 @@ translationController.recognize = (req, res) => {
 
   console.log('************************************in recognize******************************************************')
   const rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com/package/node-record-lpcm16#options 
-  // const request = require('request')
+  const request = require('request')
   let langFrom = req.body.langFrom;
   console.log(langFrom);
 
@@ -32,17 +31,15 @@ translationController.recognize = (req, res) => {
  if (req.body.status === 'go') {
   rec.start({
     sampleRate: 16000,
-  }).pipe(fetch(`https://dictation.nuancemobility.net/NMDPAsrCmdServlet/dictation?appId=${appId}&appKey=${appKey}`, {
-    method: 'POST', 
-    headers: {
+  }).pipe(request.post({
+    'url'     : `https://dictation.nuancemobility.net/NMDPAsrCmdServlet/dictation?appId=${appId}&appKey=${appKey}`,   //add multi-language input functionality
+    'headers' : {
       'Transfer-Encoding': 'chunked',
       'Content-Type': 'audio/x-wav;codec=pcm;bit=16;rate=16000',
       'Accept': 'text/plain',
       'Accept-Language': langFrom,
     }
-  }).then(fetchRes => fetchRes.json()).then(jsonRes => {
-    console.log(jsonRes);
-  }))
+  }, exports.parseResult))
 }
  
   if (req.body.status === 'stop') {
