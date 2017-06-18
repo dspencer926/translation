@@ -21,7 +21,7 @@ server.listen(PORT, function() {
 
 // socket = io.listen(server);
 
-app.use(express.static(path.join(__dirname, '/client/build')));
+// app.use(express.static(path.join(__dirname, '/client/build')));
 app.use(cors());
 app.use(logger('dev'));
 app.use(cookieParser());
