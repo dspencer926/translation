@@ -21,7 +21,7 @@ server.listen(PORT, function() {
 
 // socket = io.listen(server);
 
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(cors());
 app.use(logger('dev'));
 app.use(cookieParser());
@@ -41,7 +41,7 @@ app.use(passport.session());
 
 
 app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(__dirname + 'client/build/index.html');
 });
 
 let socketIds = [];
