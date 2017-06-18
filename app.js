@@ -13,11 +13,8 @@ var io = require('socket.io').listen(server);
 
 require('dotenv').config()
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/client/build/index.html');
-});
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, function() {
   console.log(`listening on port ${PORT}`);
 });
@@ -83,6 +80,9 @@ app.use('/testing', (req, res) => {
     res.send({user: req.user, auth: true});
 });
 
+app.get('/', function(req, res) {
+  res.sendFile(__dirname + '/client/build/index.html');
+});
 
 /* handling 404 */
 app.get('*', function(req, res) {
