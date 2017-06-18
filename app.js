@@ -12,7 +12,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
 require('dotenv').config()
-app.use(express.static(path.join(__dirname, '/client/build')));
+// app.use(express.static(path.join(__dirname, '/client/build')));
 
 
 const PORT = process.env.PORT || 3000;
