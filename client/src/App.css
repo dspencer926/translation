@@ -146,24 +146,6 @@ TRANSLATION COMPONENT
   width: 100%;
 }
 
-.on-top {  /* for translation choice box*/
-  position: fixed;
-  border-radius: 15px;
-  margin: 25%;
-  background-color: gray;
-  z-index: 2;
-}
-
-.on-top ul {
-  list-style: none;
-  padding: 20px;
-}
-
-.on-top ul li {
-  border: 1px solid black;
-  margin-bottom: 5px;
-}
-
 #input-box, #result-box, #sts-box {
   width: 85%;
   font-size: 1.25em;
@@ -198,7 +180,7 @@ textarea {
 
 #input-box {
   width: 85%;
-  height: 300px;
+  height: 200px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   background-color: #FFED66;
@@ -208,6 +190,7 @@ textarea {
 
 #result-box {
   width: 85%;
+  height: 200px;
   background-color: #00CECB;
   border: 1px solid #00CECB;
   border-bottom-left-radius: 15px;
@@ -430,7 +413,11 @@ select {
 }
 
 #tr-again-div {
-  text-align: center;
+  text-align: right;
+  width: 318.5px;
+  box-sizing: border-box;
+  margin: auto; 
+  padding: 0 20px 10px 0;
   background-color: #FFED66;
 }
 
@@ -459,6 +446,55 @@ select {
   border-radius: 15px;
   padding: 10px;
   justify-content: center;
+}
+
+#choice-box {
+  width: 70%;
+  left: 15%;
+  top: 15%;
+  justify-content: space-between;
+  display: flex;
+  border-radius: 15px;
+  background-color: gray;
+}
+
+.on-top {  /* for translation choice box*/
+  position: fixed;
+  z-index: 2;
+}
+
+#choice-box ul {
+  margin-top: 10%;
+  padding: 20px;
+  list-style: none;
+}
+
+#choice-box li {
+margin-bottom: 5px;
+ background-color: #FFFFEA;
+ border-radius: 15px;
+}
+
+#choice-box button {
+  margin: 15px 0;
+  font-size: 1.35em;
+}
+
+xbox {
+  height: 15px;
+  width: 15px;
+  display: flex;
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  color: #FFED66;
+  background-color: #00CECB;
+  font-size: .5em;
+  padding: 5px;
+  border-radius: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 5%;
 }
 
 

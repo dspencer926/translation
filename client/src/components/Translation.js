@@ -13,7 +13,7 @@ class Translation extends Component {
       inputText: '',                                                //  input text to be translated
       recogResult: '',                                              //  result of speech recog
       stsTranslation: '',                                           //  STS translation
-      translatedResponse: '',                                       //  response from server    
+      translatedResponse: '',                                       //  response from other user    
       result: '',                                                   //  translated text in target language
       isRecording: false,                                           //  true/false is recording voice
       recClass: 'off',                                              //  class for record button animation
@@ -23,6 +23,7 @@ class Translation extends Component {
       resultStyle: null,                                            //  ''
       status: null,                                                 //  status of app overall for user to view
       canSend: false,                                               //  should send btn display
+      sendStyle: {backgroundColor: '#FF5E5B'},                      //  bkgrnd color of send button
     }
     this.handleLangFromChange = this.handleLangFromChange.bind(this);
     this.handlePhraseSubmit = this.handlePhraseSubmit.bind(this);
@@ -89,14 +90,14 @@ recogRoute() {
       if (this.state.isRecording === true) {
         this.setState({
           recClass: 'rec',
-          status: 'recording input',
+          status: 'Recording input',
         });
         this.recognizeAudio();
       }
       else {
         this.setState({
           recClass: 'off',
-          status: 'processing audio',
+          status: 'Processing audio',
         });
         this.stopRec();
       }
@@ -124,17 +125,33 @@ recognizeAudio() {
   })
   .then((json) => {
     console.log(json);
-    let resultArr = json.split('\n');
-    console.log(resultArr);
-    if (resultArr.length > 1) {this.choiceDiv(resultArr)}
+    if (json.charAt(0) === '<') {
+      console.log('in that');
+      this.setState({status: 'Please try recording again'});
+    } else {
+      let resultArr = json.split('\n');
+      console.log(resultArr);
+      if (resultArr.length > 1) {this.choiceDiv(resultArr)}
+    }
   })
 }
   
 choiceDiv(arr) {
-  this.setState({status: 'choose phrase'});
+  this.setState({
+    status: 'Choose phrase',
+    sendStyle: {backgroundColor: '#FF5E5B'}
+  });
   arr.pop();
   let translationBox = document.querySelector('#input-div');
   let choiceBox = document.createElement('div');
+  choiceBox.setAttribute('id', 'choice-box');
+  let xBox = document.createElement('xbox');
+  xBox.innerHTML = 'X'
+  xBox.addEventListener('click', () => {
+    choiceBox.remove(),
+    this.setState({status: 'Ready for input'})
+  });
+  choiceBox.appendChild(xBox);
   let choiceList = document.createElement('ul');
   let choices = arr.forEach((val) => {
     let newChoice = document.createElement('li');
@@ -145,7 +162,7 @@ choiceDiv(arr) {
           return {
             inputText: prevState.inputText += e.target.innerHTML,
             textStyle: 'text-animate',
-            status: 'awaiting translation data',
+            status: 'Awaiting translation data',
           }
         },
         () => {
@@ -209,7 +226,13 @@ sendMsg(e) {
   if (this.state.canSend) {
     console.log(socket.id);
     socket.emit('send', this.state.result);
-    this.setState({status: 'message sent (we hope)'});
+    this.setState({
+      status: 'Message sent (we hope)',
+      inputText: '',
+      translatedResponse: '',
+      canSend: false,
+      sendStyle: {backgroundColor: '#FF5E5B'},
+    });
   }
 }
 
@@ -237,7 +260,8 @@ translation(e) {
         inputText: json.data.stsTranslation,
         result: json.data.translation,
         resultStyle: 'text-animate',
-        status: 'ready to send message',
+        status: 'Ready to send message',
+        sendStyle: {backgroundColor: 'lightgreen'},
         canSend: true,
     });
   })
@@ -394,7 +418,7 @@ translation(e) {
           {/*<button id='stop-recog' onMouseup={this.stopRec}>Stop Recognition</button>*/}
         </div>
         <div id='status-div'>{this.state.status}</div>
-        <button id='send-btn' onClick={(e) => {this.sendMsg(e)}}>Send!</button>
+        <button id='send-btn' style={this.state.sendStyle} onClick={(e) => {this.sendMsg(e)}}>Send!</button>
       </div>
     );
   }
