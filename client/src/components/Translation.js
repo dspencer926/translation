@@ -21,6 +21,8 @@ class Translation extends Component {
       convoStyle: {backgroundColor: '#FFFFEA', color: 'black'},     //  conversation mode button style
       textStyle: null,                                              //  for animation of text
       resultStyle: null,                                            //  ''
+      status: null,                                                 //  status of app overall for user to view
+      canSend: false,                                               //  should send btn display
     }
     this.handleLangFromChange = this.handleLangFromChange.bind(this);
     this.handlePhraseSubmit = this.handlePhraseSubmit.bind(this);
@@ -50,15 +52,15 @@ componentDidMount() {
   this.setState({
     langFrom: langFrom,
     langTo: langTo,
+    status: 'Ready for input',
   });
   console.log(langFrom, langTo);
 }
 
-componentDidUpdate() {
-  console.log('updating');
-  console.log(this.state);
-
-}
+// componentDidUpdate() {
+//   console.log('updating');
+//   console.log(this.state);
+// }
 
 //sets state with input text
 handleInput(e) {
@@ -85,11 +87,17 @@ recogRoute() {
   this.setState((prevState) => {return ({isRecording: !prevState.isRecording})}, 
     () => {
       if (this.state.isRecording === true) {
-        this.setState({recClass: 'rec'});
+        this.setState({
+          recClass: 'rec',
+          status: 'recording input',
+        });
         this.recognizeAudio();
       }
       else {
-        this.setState({recClass: 'off'});
+        this.setState({
+          recClass: 'off',
+          status: 'processing audio',
+        });
         this.stopRec();
       }
   });
@@ -123,8 +131,8 @@ recognizeAudio() {
 }
   
 choiceDiv(arr) {
+  this.setState({status: 'choose phrase'});
   arr.pop();
-  console.log(arr);
   let translationBox = document.querySelector('#input-div');
   let choiceBox = document.createElement('div');
   let choiceList = document.createElement('ul');
@@ -137,6 +145,7 @@ choiceDiv(arr) {
           return {
             inputText: prevState.inputText += e.target.innerHTML,
             textStyle: 'text-animate',
+            status: 'awaiting translation data',
           }
         },
         () => {
@@ -180,8 +189,6 @@ choiceDiv(arr) {
 
 //stops recording when recording button is clicked
 stopRec() {
-  console.log('stop');
-  console.log(this.state.langTo, this.state.langFrom)
   fetch('/translation/recognize', {
     credentials: 'same-origin',
     method: 'POST',
@@ -195,11 +202,15 @@ stopRec() {
   })
 }
 
+// sends message
+
 sendMsg(e) {
   e.preventDefault();
-  console.log(socket.id);
-  socket.emit('testing', this.state.result);
-
+  if (this.state.canSend) {
+    console.log(socket.id);
+    socket.emit('send', this.state.result);
+    this.setState({status: 'message sent (we hope)'});
+  }
 }
 
 // sends input text to backend to be translated and sets state with translated resul [then sends info to TTS] <-- own func?
@@ -226,6 +237,8 @@ translation(e) {
         inputText: json.data.stsTranslation,
         result: json.data.translation,
         resultStyle: 'text-animate',
+        status: 'ready to send message',
+        canSend: true,
     });
   })
 }
@@ -321,7 +334,7 @@ translation(e) {
           <div id='input-div'>
             <form id='translation-form' onSubmit={(e) => this.translation(e)}>
               <textarea id='input-box' name='text' rows='3' value={this.state.inputText} className={this.state.textStyle} onChange={(e) => this.handleInput(e)}/>
-                <button id='send-btn' onClick={(e) => {this.sendMsg(e)}}>send!</button>
+              <div id='tr-again-div'onClick={this.translation}>Translate Again</div>
                 <div id='to-from-div'>
                   <div id='from-div'>
                     <select name='langFrom' defaultValue='eng-USA' id='langFrom' onChange={(e) => {this.handleLangFromChange(e)}}> 
@@ -380,6 +393,8 @@ translation(e) {
           <button id='start-recog' onClick={this.recogRoute}><i className={`${this.state.recClass} fa fa-microphone fa-3x`} aria-hidden="true"></i></button>
           {/*<button id='stop-recog' onMouseup={this.stopRec}>Stop Recognition</button>*/}
         </div>
+        <div id='status-div'>{this.state.status}</div>
+        <button id='send-btn' onClick={(e) => {this.sendMsg(e)}}>Send!</button>
       </div>
     );
   }

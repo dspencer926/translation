@@ -22,7 +22,8 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Translation recordState={this.recordState} />
+        <Translation 
+        recordState={this.recordState} />
       </div>
     );
   }

@@ -48,6 +48,7 @@ translationController.recognize = (req, res) => {
 //______________GOOGLE TRANSLATE_____________________________________________________________________________
 
 translationController.translate = (req, res) => {
+  console.log('************************************in translate******************************************************')
   let langFrom = '';
   switch (req.body.langFrom) {
     case 'eng-USA': 

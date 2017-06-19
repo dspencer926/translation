@@ -40,7 +40,7 @@ socket.on('disconnect', (socket) => {
   })
   console.log(socketIds)
 })
-  socket.on('testing', (message) => {
+  socket.on('send', (message) => {
     let testSocket = socketIds.filter((val) => {
     return (val !== socket.id)
   })
