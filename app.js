@@ -22,8 +22,6 @@ server.listen(PORT, function() {
   console.log(`listening on port ${PORT}`);
 });
 
-// socket = io.listen(server);
-
 app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(cors());
 app.use(logger('dev'));
@@ -81,7 +79,7 @@ const translationRoute = require('./routes/translationRoute');
 app.use('/translation', translationRoute);
 
 app.get('/*', function (req, res) {
-   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+   res.sendFile(path.join(__dirname, 'index.html'));
  });
 
 /* handling 404 */
