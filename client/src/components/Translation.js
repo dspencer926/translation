@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import responsiveVoice from '../responsiveVoice.js';
-const socket = require('socket.io-client')();
+const socket = require('socket.io-client')('/');
+const ss = require('socket.io-stream');
+const MSR = require('msr');
 
 class Translation extends Component {
   constructor(props) {
@@ -15,7 +17,8 @@ class Translation extends Component {
       stsTranslation: '',                                           //  STS translation
       translatedResponse: '',                                       //  response from other user    
       result: '',                                                   //  translated text in target language
-      isRecording: false,                                           //  true/false is recording voice
+      isRecording: false,                                           //  true/false is currently recording voice
+      rdyToRecord: true,                                            //  true/false is ready to record
       recClass: 'off',                                              //  class for record button animation
       convoMode: false,                                             //  conversation mode on/off
       convoStyle: {backgroundColor: '#FFFFEA', color: 'black'},     //  conversation mode button style
@@ -28,23 +31,35 @@ class Translation extends Component {
     this.handleLangFromChange = this.handleLangFromChange.bind(this);
     this.handlePhraseSubmit = this.handlePhraseSubmit.bind(this);
     this.handleLangToChange = this.handleLangToChange.bind(this);
+    this.recorderInitialize = this.recorderInitialize.bind(this);
     this.recognizeAudio = this.recognizeAudio.bind(this);
     this.handleInput = this.handleInput.bind(this);
     this.translation = this.translation.bind(this);
     this.convoToggle = this.convoToggle.bind(this);
-    this.recogRoute = this.recogRoute.bind(this);
-    this.stopRec = this.stopRec.bind(this);
     this.clear = this.clear.bind(this);
     this.speak = this.speak.bind(this);
+
     socket.on('translatedResponse', (response) => {
       console.log(response);
       this.setState({
         inputText: '',
         translatedResponse: response,
+        rdyToRecord: true,
       }, () => {
+        socket.emit('received');
         this.speak()
       })
     });
+    socket.on('received', () => {
+      this.setState({
+        status: 'Message received',
+        rdyToRecord: true,
+      });
+    })
+    socket.on('recognized', (body) => {
+      console.log(body);
+      this.recognizeAudio(body);
+    })
   }
 
 componentDidMount() {
@@ -56,6 +71,7 @@ componentDidMount() {
     status: 'Ready for input',
   });
   console.log(langFrom, langTo);
+  this.recorderInitialize()
 }
 
 // componentDidUpdate() {
@@ -83,57 +99,42 @@ handleLangToChange(e) {
   this.setState({langTo: e.target.value});
 }
 
-// decides what to do when record button is clicked
-recogRoute() {
-  this.setState((prevState) => {return ({isRecording: !prevState.isRecording})}, 
-    () => {
-      if (this.state.isRecording === true) {
-        this.setState({
-          recClass: 'rec',
-          status: 'Recording input',
-        });
-        this.recognizeAudio();
-      }
-      else {
-        this.setState({
-          recClass: 'off',
-          status: 'Processing audio',
-        });
-        this.stopRec();
-      }
-  });
-}
-
 // sends recorded audio to backend for recognition [then creates choice div if necessary] <-- make its own function?
-recognizeAudio() {
+recognizeAudio(json) {
+
 
   this.setState({textStyle: null});
-  fetch('/translation/recognize', {
-    credentials: 'same-origin',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      status: 'go',
-      langFrom: this.state.langFrom,
-      langTo: this.state.langTo,
-    })
-  })
-  .then((res) => {
-    return res.json()
-  })
-  .then((json) => {
+  // fetch('/translation/recognize', {
+  //   credentials: 'same-origin',
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     message: url,
+  //   }),
+  // })
+  // .then((res) => {
+  //   return res.json()
+  // })
+  // .then((json) => {
     console.log(json);
+    this.setState({
+      status: 'Ready for input',
+      rdyToRecord: true,
+    })
     if (json.charAt(0) === '<') {
       console.log('in that');
-      this.setState({status: 'Please try recording again'});
+      this.setState({
+        status: 'Please try recording again',
+        rdyToRecord: true,
+      });
     } else {
       let resultArr = json.split('\n');
       console.log(resultArr);
       if (resultArr.length > 1) {this.choiceDiv(resultArr)}
     }
-  })
+  // })
 }
   
 choiceDiv(arr) {
@@ -203,22 +204,6 @@ choiceDiv(arr) {
   //     }) 
 //____________________________________________________________________________________________________________________
 
-
-//stops recording when recording button is clicked
-stopRec() {
-  fetch('/translation/recognize', {
-    credentials: 'same-origin',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      status: 'stop',
-      langFrom: this.state.langFrom,
-    })
-  })
-}
-
 // sends message
 
 sendMsg(e) {
@@ -227,7 +212,7 @@ sendMsg(e) {
     console.log(socket.id);
     socket.emit('send', this.state.result);
     this.setState({
-      status: 'Message sent (we hope)',
+      status: 'Message sent',
       inputText: '',
       translatedResponse: '',
       canSend: false,
@@ -351,9 +336,128 @@ translation(e) {
     });
   }
 
+//  recorderInitialize() {
+//  let record = document.getElementById('start-recog');
+//     if (navigator.mediaDevices) {
+//       var constraints = { audio: true };
+//       let count = 0;
+//       let str;
+//       navigator.mediaDevices.getUserMedia(constraints)
+//       .then((stream) => {
+//         var audioContext = window.AudioContext;
+//         var context = new audioContext();
+//         var audioInput = context.createMediaStreamSource(stream);
+//         var bufferSize = 2048;
+//         // create a javascript node
+//         var recorder = context.createScriptProcessor(bufferSize, 1, 1);
+
+//         // specify the processing function
+//         recorder.onaudioprocess = recorderProcess;
+//         var sStream = ss.createStream();
+//         ss(socket).emit('stream', sStream);
+//         // connect stream to our recorder
+//         audioInput.connect(recorder);
+//         // connect our recorder to the previous destination
+//         recorder.connect(context.destination);
+
+//         function recorderProcess(e) {
+
+//         //   for (
+//         var float32Array = e.inputBuffer.getChannelData(0) || new Float32Array(this.bufferSize);
+//         // len = float32Array.length,
+//         // int16Array = new Int16Array(len);
+//         // len--;)
+//         // int16Array[len] = 32767 * Math.min(1, float32Array[len]);
+//         // ss(socket).emit('stream', int16Array.buffer);
+//         sStream.write('hola ');
+//           var left = convertFloat32ToInt16(e.inputBuffer.getChannelData(0));
+//           // sStream.write(left)
+//           // console.log(sStream);
+//           //var f = $("#aud").attr("src");
+//           // var src = window.URL.createObjectURL(stream);
+//           // ss.createBlobReadStream(src).pipe(sStream);
+//           //ss.createReadStream(f).pipe(widnow.stream);
+
+//             }
+
+
+
+  recorderInitialize() {
+    let record = document.getElementById('start-recog');
+    let audio = document.getElementById('audio');
+    let blobby;
+    if (navigator.mediaDevices) {
+      console.log('getUserMedia supported.');
+      var constraints = { audio: true };
+      var chunks = [];
+      navigator.mediaDevices.getUserMedia(constraints)
+      .then((stream) => {
+        var mediaRecorder = new MSR(stream);
+        mediaRecorder.mimeType = 'audio/wav';
+        mediaRecorder.ondataavailable = function (blob) {
+          blobby = blob;
+        };
+
+        // visualize(stream);
+
+        record.onclick = () => {
+          var sStream = ss.createStream();
+          ss(socket).emit('stream', sStream, this.state.langFrom);
+          if (this.state.rdyToRecord === true) {
+          mediaRecorder.start(10000);
+          this.setState({
+            recClass: 'rec',
+            status: 'Recording input',
+            isRecording: true,
+            rdyToRecord: false,
+          }, () => {console.log("recorder started - status: ", this.state.status)})
+          
+        }
+
+        else if (this.state.isRecording === true) {
+          mediaRecorder.stop();
+          console.log('stopped')
+          var file = new File([blobby], 'msr-' + (new Date).toISOString().replace(/:|\./g, '-') + '.wav', {
+            type: 'audio/wav' // is file necessary?
+          });
+          // console.log(url);
+          //   audio.src = url;
+          //   audio.play();
+          ss.createBlobReadStream(file).pipe(sStream);
+          this.setState({
+            recClass: 'off',
+            status: 'Processing audio',
+            isRecording: false,
+          });
+          console.log("recorder stopped - status: ", this.state.status);
+          // mediaRecorder.onstop = (e) => {
+
+            // var audioBox = document.getElementById('audio-box');
+            // var audio = document.createElement('audio');
+            // audioBox.appendChild(audio);
+
+            // var blob = new Blob(chunks, {'type' : 'audio/ogg; codecs=pcm'});
+            //   chunks = [];
+            //   ss(socket).emit('stream', sStream);
+            //   sStream.write(blob);
+            //   console.log(blob);
+              // let url = URL.createObjectURL(blob)
+
+              // console.log(blob);
+              // this.recognizeAudio(url);
+            // }
+          }
+        }
+      })
+  } else {
+    console.log('Audio doesnt work');
+  }
+}
+
   render() {
     return (
       <div id='translation-container'>
+      <div id='audio-box'><audio id='audio' /></div>
         <div id='translation-div'>
           <div id='input-div'>
             <form id='translation-form' onSubmit={(e) => this.translation(e)}>
@@ -414,8 +518,7 @@ translation(e) {
           </div>
         </div>
         <div id='recognize-button-container' className={this.state.recClass}>
-          <button id='start-recog' onClick={this.recogRoute}><i className={`${this.state.recClass} fa fa-microphone fa-3x`} aria-hidden="true"></i></button>
-          {/*<button id='stop-recog' onMouseup={this.stopRec}>Stop Recognition</button>*/}
+          <button id='start-recog'><i className={`${this.state.recClass} fa fa-microphone fa-3x`} aria-hidden="true"></i></button>
         </div>
         <div id='status-div'>{this.state.status}</div>
         <button id='send-btn' style={this.state.sendStyle} onClick={(e) => {this.sendMsg(e)}}>Send!</button>

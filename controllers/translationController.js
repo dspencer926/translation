@@ -1,4 +1,7 @@
 const Translate = require('@google-cloud/translate');
+const wav = require('wav');
+const Player = require('player');
+const sox = require('sox-stream');
 
 const translationController = {};
 
@@ -18,8 +21,18 @@ translationController.recognize = (req, res) => {
 //__________________NUANCE CODE_____________________________________________________________________________________
 
   console.log('************************************in recognize******************************************************')
+  let data = req.body.message;
+  console.log(data);
+  const player = new Player('http://localhost:3000/695f6faf-15cd-437d-a48b-9594b0c00096');
+  player.play();
+  // console.log(req.body);
+  // const write = new wav.Writer(data);
+  // console.log(write);
   let langFrom = req.body.langFrom;
-  console.log(langFrom);
+  // let blob = req.body.blob;
+  // console.log(blob);
+  // console.log(langFrom);
+  // res.json(blob);
 
 
   exports.parseResult = (err, resp, body) => {
@@ -107,12 +120,14 @@ translationController.translate = (req, res) => {
     .then((results) => {
       translation = results[0];
       console.log(translation);
-      text = translation;
       options = {
         from: options.to,
         to: options.from,
-      };
-      translateClient.translate(text, options)
+      }})
+      .catch((err) => {
+      console.error('ERROR:', err);
+    })
+    .then(() => {translateClient.translate(translation, options)
       .then((results) => {
         let stsTranslation = results[0];
         console.log('translation', translation)
@@ -123,11 +138,11 @@ translationController.translate = (req, res) => {
             stsTranslation: stsTranslation,
             source: options.from, 
             target: options.to}})
-        })
-    .catch((err) => {
-      console.error('ERROR:', err);
+      })
+      .catch((err) => {
+        console.error('ERROR:', err);
+      });
     });
-  });
 }
 
 module.exports = translationController;
