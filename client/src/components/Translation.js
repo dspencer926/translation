@@ -50,6 +50,9 @@ class Translation extends Component {
         this.speak()
       })
     });
+    io.on('translated', (data) => {
+      console.log(data);
+    })
     io.on('received', () => {
       this.setState({
         status: 'Message received',
@@ -63,6 +66,11 @@ class Translation extends Component {
   }
 
 componentDidMount() {
+  io.emit('translate', {
+    message: 'Good morning',
+    from: this.state.langFrom,
+    to: 'pt',
+  });
   let langFrom = document.querySelector('#langFrom')[0].value;
   let langTo = document.querySelector('#langTo')[0].value;
   this.setState({
@@ -224,32 +232,38 @@ sendMsg(e) {
 // sends input text to backend to be translated and sets state with translated resul [then sends info to TTS] <-- own func?
 translation(e) {
   this.setState({resultStyle: null});
-  fetch('/translation/translate', {
-    credentials: 'same-origin',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      text: this.state.inputText,
-      langFrom: this.state.langFrom,
-      langTo: this.state.langTo,
-    })
-  })
-  .then((res) => {
-    return res.json()
-  })
-  .then((json) => {
-    console.log(json);
-    this.setState({
-        inputText: json.data.stsTranslation,
-        result: json.data.translation,
-        resultStyle: 'text-animate',
-        status: 'Ready to send message',
-        sendStyle: {backgroundColor: 'lightgreen'},
-        canSend: true,
-    });
-  })
+  let data = {
+    message: 'Good morning',
+    from: this.state.langFrom,
+    to: 'pt',
+  };
+  io.emit('translate', data);
+  // fetch('/translation/translate', {
+  //   credentials: 'same-origin',
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     text: this.state.inputText,
+  //     langFrom: this.state.langFrom,
+  //     langTo: this.state.langTo,
+  //   })
+  // })
+  // .then((res) => {
+  //   return res.json()
+  // })
+  // .then((json) => {
+  //   console.log(json);
+  //   this.setState({
+  //       inputText: json.data.stsTranslation,
+  //       result: json.data.translation,
+  //       resultStyle: 'text-animate',
+  //       status: 'Ready to send message',
+  //       sendStyle: {backgroundColor: 'lightgreen'},
+  //       canSend: true,
+  //   });
+  // })
 }
 
 

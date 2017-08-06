@@ -1,5 +1,7 @@
-const Translate = require('@google-cloud/translate');
+const translate = require('@google-cloud/translate');
+// const speech = require('@google-cloud/speech');
 const sox = require('sox-stream');
+
 
 const translationController = {};
 
@@ -7,7 +9,7 @@ const rec = require('node-record-lpcm16')//"borrowed" from https://www.npmjs.com
 const request = require('request')
 
 const projectId = 'translation-app-168502';
-const translateClient = Translate({
+const translateClient = translate({
     projectId: projectId
   });
 
