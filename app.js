@@ -80,9 +80,9 @@ io.on('connection', (socket) => {
 const translationRoute = require('./routes/translationRoute');
 app.use('/translation', translationRoute);
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + 'client/build/index.html');
-});
+app.get('/*', function (req, res) {
+   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+ });
 
 /* handling 404 */
 app.get('*', function(req, res) {
