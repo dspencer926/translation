@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import responsiveVoice from '../responsiveVoice.js';
-const socket = require('socket.io-client')('/');
+const io = require('socket.io-client')('/');
 const ss = require('socket.io-stream');
 const MSR = require('msr');
 
@@ -39,24 +39,24 @@ class Translation extends Component {
     this.clear = this.clear.bind(this);
     this.speak = this.speak.bind(this);
 
-    socket.on('translatedResponse', (response) => {
+    io.on('translatedResponse', (response) => {
       console.log(response);
       this.setState({
         inputText: '',
         translatedResponse: response,
         rdyToRecord: true,
       }, () => {
-        socket.emit('received');
+        io.emit('received');
         this.speak()
       })
     });
-    socket.on('received', () => {
+    io.on('received', () => {
       this.setState({
         status: 'Message received',
         rdyToRecord: true,
       });
     })
-    socket.on('recognized', (body) => {
+    io.on('recognized', (body) => {
       console.log(body);
       this.recognizeAudio(body);
     })
@@ -209,8 +209,8 @@ choiceDiv(arr) {
 sendMsg(e) {
   e.preventDefault();
   if (this.state.canSend) {
-    console.log(socket.id);
-    socket.emit('send', this.state.result);
+    console.log(io.id);
+    io.emit('send', this.state.result);
     this.setState({
       status: 'Message sent',
       inputText: '',
@@ -393,6 +393,7 @@ translation(e) {
       navigator.mediaDevices.getUserMedia(constraints)
       .then((stream) => {
         var mediaRecorder = new MSR(stream);
+        mediaRecorder.audioChannels = 1;
         mediaRecorder.mimeType = 'audio/wav';
         mediaRecorder.ondataavailable = function (blob) {
           blobby = blob;
@@ -402,7 +403,7 @@ translation(e) {
 
         record.onclick = () => {
           var sStream = ss.createStream();
-          ss(socket).emit('stream', sStream, this.state.langFrom);
+          ss(io).emit('stream', sStream, this.state.langFrom);
           if (this.state.rdyToRecord === true) {
           mediaRecorder.start(10000);
           this.setState({

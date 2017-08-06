@@ -24,34 +24,47 @@ translationController.recognize = (req, res) => {
   // console.log(req.body);
   // const write = new wav.Writer(data);
   // console.log(write);
-  let langFrom = req.body.langFrom;
+  // let langFrom = req.body.langFrom;
   // let blob = req.body.blob;
   // console.log(blob);
   // console.log(langFrom);
   // res.json(blob);
 
 
-  exports.parseResult = (err, resp, body) => {
-    return res.json(body);  // figure out status/error
-  }
+    const config = {
+      config: {
+        languageCode: 'en-US'
+      },
+      interimResults: false // If you want interim results, set this to true
+    };
+    const recognizeStream = speechClient.streamingRecognize(config)
+      .on('error', console.error)
+      .on('data', (data) => {
+        console.log(
+            `Transcription: ${data.results[0].alternatives[0].transcript}`);
+      });
+
+//   exports.parseResult = (err, resp, body) => {
+//     return res.json(body);  // figure out status/error
+//   }
   
- if (req.body.status === 'go') {
-  rec.start({
-    sampleRate: 16000,
-  }).pipe(request.post({
-    'url'     : `https://dictation.nuancemobility.net/NMDPAsrCmdServlet/dictation?appId=${appId}&appKey=${appKey}`,   //add multi-language input functionality
-    'headers' : {
-      'Transfer-Encoding': 'chunked',
-      'Content-Type': 'audio/x-wav;codec=pcm;bit=16;rate=16000',
-      'Accept': 'text/plain',
-      'Accept-Language': langFrom,
-    }
-  }, exports.parseResult))
-}
+//  if (req.body.status === 'go') {
+//   rec.start({
+//     sampleRate: 16000,
+//   }).pipe(request.post({
+//     'url'     : `https://dictation.nuancemobility.net/NMDPAsrCmdServlet/dictation?appId=${appId}&appKey=${appKey}`,   //add multi-language input functionality
+//     'headers' : {
+//       'Transfer-Encoding': 'chunked',
+//       'Content-Type': 'audio/x-wav;codec=pcm;bit=16;rate=16000',
+//       'Accept': 'text/plain',
+//       'Accept-Language': langFrom,
+//     }
+//   }, exports.parseResult))
+// }
  
-  if (req.body.status === 'stop') {
-    rec.stop()
-  }
+//   if (req.body.status === 'stop') {
+//     rec.stop()
+//   }
 }
 
 //______________GOOGLE TRANSLATE_____________________________________________________________________________
