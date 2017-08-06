@@ -9,7 +9,6 @@ var io = require('socket.io').listen(server);
 const ss = require('socket.io-stream');
 const fs = require('fs');
 const sox = require('sox-stream');
-const player = require('player');
 const request = require('request')
 
 require('dotenv').config()

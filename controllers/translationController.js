@@ -1,6 +1,4 @@
 const Translate = require('@google-cloud/translate');
-const wav = require('wav');
-const Player = require('player');
 const sox = require('sox-stream');
 
 const translationController = {};
@@ -23,8 +21,6 @@ translationController.recognize = (req, res) => {
   console.log('************************************in recognize******************************************************')
   let data = req.body.message;
   console.log(data);
-  const player = new Player('http://localhost:3000/695f6faf-15cd-437d-a48b-9594b0c00096');
-  player.play();
   // console.log(req.body);
   // const write = new wav.Writer(data);
   // console.log(write);
